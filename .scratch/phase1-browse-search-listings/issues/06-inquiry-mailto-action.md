@@ -10,7 +10,7 @@ See `docs/specs/phase1-browse-search-listings.md` (Implementation Decisions: "In
 
 **Status:** ready-for-agent
 
-- [ ] `available` Listing detail pages render a `mailto:` anchor addressed to the Listing's Agent `email` (added to the Agent schema in ticket 01)
-- [ ] Subject/body are URL-encoded and reference the specific Listing (Property Type, City/Area at minimum)
-- [ ] `rented` Listing detail pages render no Inquiry action at all (not present in the DOM, not just disabled)
-- [ ] Verified manually via dev server: clicking Inquiry on an `available` listing opens a mail client with prefilled subject/body; `rented` listings show no such control
+- [x] `available` Listing detail pages render a `mailto:` anchor addressed to the Listing's Agent `email` (added to the Agent schema in ticket 01)
+- [x] Subject/body are URL-encoded and reference the specific Listing (Property Type, City/Area at minimum)
+- [x] `rented` Listing detail pages render no Inquiry action at all (not present in the DOM, not just disabled)
+- [x] Verified manually via dev server: clicking Inquiry on an `available` listing opens a mail client with prefilled subject/body; `rented` listings show no such control

@@ -33,6 +33,18 @@ const rentFormatted = new Intl.NumberFormat("en-US", {
 }).format(rent);
 const bedroomsLabel = `${bedrooms} ${bedrooms === 1 ? "bedroom" : "bedrooms"}`;
 const pageTitle = `${propertyTypeLabel} in ${area}, ${city} — Property Rents`;
+
+// Ticket 06: static mailto: Inquiry action. Subject/body reference this
+// Listing's Property Type and City/Area so the Agent immediately knows
+// which unit is being asked about (spec user stories 19, 20). No form, no
+// submission handler, no persisted record — see spec "Inquiry" decision.
+const inquirySubject = `Inquiry: ${propertyTypeLabel} in ${area}, ${city}`;
+const inquiryBody =
+	`Hi ${agent.name},\n\n` +
+	`I'm interested in the ${propertyTypeLabel} in ${area}, ${city} ` +
+	`(${rentFormatted} / month, ${bedroomsLabel}). Could you share more details?\n\n` +
+	`Thanks!`;
+const inquiryMailto = `mailto:${agent.email}?subject=${encodeURIComponent(inquirySubject)}&body=${encodeURIComponent(inquiryBody)}`;
 ---
 
 <Layout title={pageTitle}>
@@ -114,9 +126,12 @@ const pageTitle = `${propertyTypeLabel} in ${area}, ${city} — Property Rents`;
 			{
 				availability === "available" && (
 					<div class="mt-4" data-testid="inquiry-action">
-						{/* Ticket 06: Inquiry mailto: action (subject/body referencing
-						this Listing, addressed to agent.email) renders here. Omitted
-						entirely for `rented` Listings per spec user story 22. */}
+						<a
+							href={inquiryMailto}
+							class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+						>
+							Inquire about this listing
+						</a>
 					</div>
 				)
 			}
