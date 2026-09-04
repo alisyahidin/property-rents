@@ -1,0 +1,53 @@
+---
+import type { Listing } from '../lib/filterListings';
+
+interface Props {
+	listing: Listing;
+}
+
+const { listing } = Astro.props;
+
+const rentFormatted = new Intl.NumberFormat('en-US', {
+	style: 'currency',
+	currency: 'USD',
+	maximumFractionDigits: 0,
+}).format(listing.rent);
+
+const propertyTypeLabel =
+	listing.propertyType.charAt(0).toUpperCase() + listing.propertyType.slice(1);
+
+const bedroomsLabel = `${listing.bedrooms} bed${listing.bedrooms === 1 ? '' : 's'}`;
+
+const coverPhoto = listing.gallery[0];
+---
+
+<li
+	class="listing-card flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
+	data-listing-id={listing.id}
+>
+	<a href={`/listings/${listing.id}/`} class="flex flex-col h-full">
+		<div class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
+			<img
+				src={coverPhoto}
+				alt={`${propertyTypeLabel} in ${listing.area}, ${listing.city}`}
+				class="h-full w-full object-cover"
+				loading="lazy"
+			/>
+			<span
+				class:list={[
+					'absolute top-2 right-2 rounded-full px-2 py-1 text-xs font-semibold',
+					listing.availability === 'available'
+						? 'bg-green-100 text-green-800'
+						: 'bg-gray-200 text-gray-600',
+				]}
+			>
+				{listing.availability === 'available' ? 'Available' : 'Rented'}
+			</span>
+		</div>
+		<div class="flex flex-1 flex-col gap-1 p-3">
+			<p class="text-lg font-bold text-gray-900">{rentFormatted}<span class="text-sm font-normal text-gray-500">/mo</span></p>
+			<p class="text-sm text-gray-700">{propertyTypeLabel} &middot; {bedroomsLabel}</p>
+			<p class="text-sm text-gray-500">{listing.area}, {listing.city}</p>
+		</div>
+	</a>
+</li>
