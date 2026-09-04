@@ -1,0 +1,6 @@
+packages:
+  - "apps/*"
+allowBuilds:
+  esbuild: true
+minimumReleaseAgeExclude:
+  - astro@7.3.1
