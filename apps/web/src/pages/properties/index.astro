@@ -1,0 +1,212 @@
+---
+// The Phase 1 listing browse/filter page (originally at `/`, moved here so
+// `/` can be a marketing homepage — see docs/specs/phase1-browse-search-listings.md).
+// Restyled to match the reference site's /properties page (centered intro,
+// PropertyCard grid) — filter functionality, element ids, and the
+// filterListings-driven default sort are all unchanged from before.
+//
+// No trailing CTA band here (unlike the homepage/About): the reference
+// site's equivalent points to a generic "Talk to an Agent" contact, but this
+// site has no generic contact channel — every inquiry goes through a
+// specific listing's agent (see CONTEXT.md's Inquiry definition) — so
+// there's nothing honest for a page-level CTA to link to here.
+//
+// PropertyCard is rendered here WITHOUT a client:* directive, unlike its use
+// on the homepage — and passed `animated={false}` so it doesn't render stuck
+// at its unhydrated `initial={opacity: 0}` pose (see PropertyCard.tsx).
+// listingFilters.ts owns #listings-list directly (it does
+// `listEl.innerHTML = ''` and rebuilds it on every filter change) — hydrating
+// individual cards inside a container that vanilla JS periodically wipes
+// would fight that script instead of cooperating with it. The cards' CSS
+// hover (shadow, image zoom) still works either way; only PropertyCard's own
+// motion.dev entrance/hover-lift is skipped here.
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import SectionIntro from '../../components/SectionIntro';
+import PropertyCard from '../../components/PropertyCard';
+import { Reveal } from '../../components/motion/Reveal';
+import { filterListings, type Listing } from '../../lib/filterListings';
+
+const entries = await getCollection('listings');
+
+const listings: Listing[] = entries.map((entry) => ({
+	id: entry.id,
+	...entry.data,
+}));
+
+// Default view: full set, sorted in the shared, consistent order (by Rent
+// ascending) — reuses filterListings rather than re-implementing sort logic.
+const sortedListings = filterListings(listings, {});
+
+// Full (unfiltered, unsorted-beyond-collection-order) Listing array, embedded
+// as JSON for ticket 04's client-side filter island. The island calls
+// `filterListings(listings, criteria)` itself, so this payload does not need
+// to be pre-sorted or pre-filtered.
+const listingsPayload = JSON.stringify(listings).replace(/</g, '\\u003c');
+---
+
+<Layout title="Properties — Property Rents">
+	<main class="mx-auto max-w-6xl px-4 pt-32 pb-20 sm:px-6 sm:pt-40 sm:pb-28 lg:px-10">
+		<Reveal client:load mode="mount">
+			<SectionIntro
+				eyebrow="Explore Our Listings"
+				heading="Every place we currently manage"
+				paragraph="Filter by property type, city, area, bedrooms, rent, and availability — results update instantly, right here."
+				align="center"
+			/>
+		</Reveal>
+
+		<p class="mt-8 text-center text-sm text-neutral-600" id="results-count">
+			{sortedListings.length} listing{sortedListings.length === 1 ? '' : 's'}
+		</p>
+
+		{
+			sortedListings.length === 0 ? (
+				<p class="mt-6 text-center text-neutral-600">
+					No listings are available right now. Please check back soon.
+				</p>
+			) : (
+				<>
+					<section
+						id="listing-filters"
+						aria-label="Filter listings"
+						class="mt-8 rounded-3xl border border-neutral-100 bg-white p-5 sm:p-6"
+					>
+						<div class="mb-4 flex items-center justify-between gap-2">
+							<h2 class="font-heading text-sm font-medium text-ink">Filter listings</h2>
+							<button
+								type="button"
+								id="clear-filters"
+								class="font-heading text-sm text-ink underline decoration-neutral-300 decoration-1 underline-offset-4 hover:decoration-ink"
+							>
+								Clear all filters
+							</button>
+						</div>
+						<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+							<div>
+								<label for="filter-property-type" class="block text-xs font-medium text-neutral-600">
+									Property type
+								</label>
+								<select
+									id="filter-property-type"
+									class="mt-1 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+								>
+									<option value="">All types</option>
+									<option value="apartment">Apartment</option>
+									<option value="house">House</option>
+									<option value="room">Room</option>
+								</select>
+							</div>
+
+							<div>
+								<label for="filter-city" class="block text-xs font-medium text-neutral-600">
+									City
+								</label>
+								<select
+									id="filter-city"
+									class="mt-1 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+								>
+									<option value="">All cities</option>
+								</select>
+							</div>
+
+							<div>
+								<label for="filter-area" class="block text-xs font-medium text-neutral-600">
+									Area
+								</label>
+								<select
+									id="filter-area"
+									class="mt-1 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none disabled:bg-neutral-50 disabled:text-neutral-400"
+									disabled
+								>
+									<option value="">Select a city first</option>
+								</select>
+							</div>
+
+							<div>
+								<span class="block text-xs font-medium text-neutral-600">Bedrooms</span>
+								<div class="mt-1 flex gap-2">
+									<input
+										type="number"
+										id="filter-min-bedrooms"
+										min="0"
+										inputmode="numeric"
+										placeholder="Min"
+										aria-label="Minimum bedrooms"
+										class="w-1/2 rounded-xl border border-neutral-200 px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+									/>
+									<input
+										type="number"
+										id="filter-max-bedrooms"
+										min="0"
+										inputmode="numeric"
+										placeholder="Max"
+										aria-label="Maximum bedrooms"
+										class="w-1/2 rounded-xl border border-neutral-200 px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+									/>
+								</div>
+							</div>
+
+							<div>
+								<span class="block text-xs font-medium text-neutral-600">Rent ($/mo)</span>
+								<div class="mt-1 flex gap-2">
+									<input
+										type="number"
+										id="filter-min-rent"
+										min="0"
+										inputmode="numeric"
+										placeholder="Min"
+										aria-label="Minimum rent"
+										class="w-1/2 rounded-xl border border-neutral-200 px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+									/>
+									<input
+										type="number"
+										id="filter-max-rent"
+										min="0"
+										inputmode="numeric"
+										placeholder="Max"
+										aria-label="Maximum rent"
+										class="w-1/2 rounded-xl border border-neutral-200 px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+									/>
+								</div>
+							</div>
+
+							<div class="flex items-end">
+								<label class="inline-flex items-center gap-2 text-sm text-neutral-600">
+									<input
+										type="checkbox"
+										id="filter-available-only"
+										class="h-4 w-4 rounded border-neutral-300 text-ink focus:ring-ink"
+									/>
+									Show available only
+								</label>
+							</div>
+						</div>
+					</section>
+
+					<p id="no-results-message" class="hidden mt-10 text-center text-neutral-600">
+						No listings match your filters. Try broadening your search.
+					</p>
+
+					<div id="listings-list" class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+						{sortedListings.map((listing) => (
+							<PropertyCard listing={listing} animated={false} />
+						))}
+					</div>
+				</>
+			)
+		}
+	</main>
+
+	<script type="application/json" id="listings-data" set:html={listingsPayload} />
+
+	<script>
+		// Ticket 04's client-side filter island: DOM wiring, city→area
+		// derivation, criteria reading, and re-rendering all live in
+		// listingFilters.ts, kept separate from this page's server-rendering
+		// concerns. See src/scripts/listingFilters.ts.
+		import { initListingFilters } from '../../scripts/listingFilters';
+
+		initListingFilters();
+	</script>
+</Layout>

@@ -1,1 +1,81 @@
 @import "tailwindcss";
+
+/*
+ * Homepage design tokens, lifted from the reference site's own published
+ * stylesheet (brand--primary / brand--secondary / neutrals scale) so the
+ * marketing homepage reproduces its exact palette and shape language.
+ * `/properties` and the listing detail page are untouched and keep using
+ * Tailwind's default gray-* scale, so redefining `neutral-*` here only
+ * affects components that opt into it.
+ */
+@theme {
+	--color-ink: #131313;
+	--color-peach: #fccc9b;
+	--color-neutral-50: #f6f6f6;
+	--color-neutral-100: #e7e7e7;
+	--color-neutral-200: #d1d1d1;
+	--color-neutral-300: #b0b0b0;
+	--color-neutral-400: #888888;
+	--color-neutral-600: #5d5d5d;
+	--color-neutral-900: #3d3d3d;
+
+	--font-heading: "Inter Tight", sans-serif;
+	--font-body: "Inter", sans-serif;
+}
+
+/*
+ * Every photo on the site starts zoomed in and settles to its true scale the
+ * moment it enters view (src/scripts/zoomOnView.ts adds `.is-zoomed-out`
+ * once an IntersectionObserver sees it). The zoomed-in pose lives here, in
+ * plain CSS, so it's correct on first paint with no JS and no hydration —
+ * the element just needs an `overflow-hidden` ancestor to clip it.
+ *
+ * The hover rule below is more specific than `.zoom-in-view.is-zoomed-out`
+ * on purpose, so a card's hover-zoom (PropertyCard.tsx, listingFilters.ts)
+ * composes with this instead of the two transform rules racing each other
+ * at equal specificity. It only matches once `.is-zoomed-out` is present, so
+ * hovering a card before it's scrolled into view doesn't fight the entrance.
+ *
+ * The shimmer background is every photo's loading skeleton: a plain <img>
+ * paints nothing over its box until the file has actually downloaded, so
+ * without this an image-heavy page (the listing detail gallery especially)
+ * shows a stretch of blank white while photos are still in flight. Because
+ * `.zoom-in-view` already sits on every real photo on the site, this needs
+ * no extra markup anywhere — the shimmer just sits behind the image and is
+ * silently covered the instant it paints, with nothing to unmount or clean
+ * up once it's loaded.
+ */
+.zoom-in-view {
+	transform: scale(1.18);
+	transition: transform 1.15s cubic-bezier(0.22, 1, 0.36, 1);
+	background: linear-gradient(
+		100deg,
+		var(--color-neutral-100) 8%,
+		var(--color-neutral-50) 18%,
+		var(--color-neutral-100) 33%
+	);
+	background-size: 200% 100%;
+	animation: img-shimmer 1.6s ease-in-out infinite;
+}
+.zoom-in-view.is-zoomed-out {
+	transform: scale(1);
+}
+.group:hover .zoom-in-view.is-zoomed-out {
+	transform: scale(1.05);
+	transition-duration: 0.5s;
+}
+
+@keyframes img-shimmer {
+	to {
+		background-position: -200% 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.zoom-in-view {
+		transition: none;
+		transform: none;
+		animation: none;
+		background: var(--color-neutral-100);
+	}
+}

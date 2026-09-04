@@ -5,12 +5,14 @@
 // docs/specs/phase1-browse-search-listings.md (Implementation Decisions:
 // "Rendering strategy").
 //
-// Extracted out of index.astro's inline <script> so the page shell (server
-// rendering of listings via ListingCard) stays separate from this
-// filter-widget's DOM wiring/state. Imported and invoked from index.astro.
+// Extracted out of /properties' inline <script> so the page shell (server
+// rendering of listings via PropertyCard) stays separate from this
+// filter-widget's DOM wiring/state. Imported and invoked from
+// src/pages/properties/index.astro.
 
 import { filterListings, type Listing, type ListingFilterCriteria } from '../lib/filterListings';
 import { formatRent, propertyTypeLabel } from '../lib/format';
+import { initZoomOnView } from './zoomOnView';
 
 export function initListingFilters(): void {
 	const dataEl = document.getElementById('listings-data');
@@ -20,6 +22,13 @@ export function initListingFilters(): void {
 	const noResultsEl = document.getElementById('no-results-message');
 
 	if (!dataEl || !filtersSection || !listEl || !countEl || !noResultsEl) return;
+
+	// Re-typed as non-null: the guard above proves it at runtime, but a
+	// nested function closing over these (render(), below) doesn't retain
+	// that narrowing across the function boundary.
+	const list = listEl as HTMLElement;
+	const count = countEl as HTMLElement;
+	const noResults = noResultsEl as HTMLElement;
 
 	const allListings: Listing[] = JSON.parse(dataEl.textContent ?? '[]');
 
@@ -99,84 +108,98 @@ export function initListingFilters(): void {
 		return criteria;
 	}
 
-	// Mirrors ListingCard.astro's markup so client-rendered cards look
+	// Mirrors PropertyCard.astro's markup so client-rendered cards look
 	// identical to the server-rendered ones. Rent formatting and the
-	// property-type label share the exact same helpers ListingCard.astro and
+	// property-type label share the exact same helpers PropertyCard.astro and
 	// the Listing detail page use (src/lib/format.ts) — only the DOM
 	// construction itself is duplicated, since Astro components can't render
 	// dynamically in the browser and this app has no client-side framework.
-	function renderCard(listing: Listing): HTMLLIElement {
+	function renderCard(listing: Listing): HTMLAnchorElement {
 		const typeLabel = propertyTypeLabel(listing.propertyType);
+		const bedroomsLabel = `${listing.bedrooms} bed${listing.bedrooms === 1 ? '' : 's'}`;
+		const isAvailable = listing.availability === 'available';
 
-		const li = document.createElement('li');
-		li.className =
-			'listing-card flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm';
-		li.dataset.listingId = listing.id;
-
-		const link = document.createElement('a');
-		link.href = `/listings/${listing.id}/`;
-		link.className = 'flex flex-col h-full';
+		const card = document.createElement('a');
+		card.href = `/properties/${listing.id}/`;
+		card.dataset.listingId = listing.id;
+		card.className =
+			'group flex flex-col overflow-hidden rounded-3xl border border-neutral-100 p-2 transition-shadow duration-200 hover:shadow-lg';
 
 		const imageWrap = document.createElement('div');
-		imageWrap.className = 'relative aspect-[4/3] w-full overflow-hidden bg-gray-100';
+		imageWrap.className = 'relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-neutral-100';
 
 		const img = document.createElement('img');
 		img.src = listing.gallery[0] ?? '';
 		img.alt = `${typeLabel} in ${listing.area}, ${listing.city}`;
-		img.className = 'h-full w-full object-cover';
+		img.className = 'zoom-in-view h-full w-full object-cover';
 		img.loading = 'lazy';
 
-		const badge = document.createElement('span');
-		badge.className = [
-			'absolute top-2 right-2 rounded-full px-2 py-1 text-xs font-semibold',
-			listing.availability === 'available'
-				? 'bg-green-100 text-green-800'
-				: 'bg-gray-200 text-gray-600',
+		const availabilityWrap = document.createElement('div');
+		availabilityWrap.className = 'absolute top-3 right-3';
+		const availabilityBadge = document.createElement('span');
+		availabilityBadge.className = [
+			'inline-flex items-center rounded-full px-3 py-1 text-sm font-medium',
+			isAvailable ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600',
 		].join(' ');
-		badge.textContent = listing.availability === 'available' ? 'Available' : 'Rented';
+		availabilityBadge.textContent = isAvailable ? 'Available' : 'Rented';
+		availabilityWrap.appendChild(availabilityBadge);
 
-		imageWrap.append(img, badge);
+		const specsWrap = document.createElement('div');
+		specsWrap.className = 'absolute inset-x-0 bottom-0 flex flex-wrap gap-2 p-3';
+		for (const text of [bedroomsLabel, typeLabel]) {
+			const pill = document.createElement('span');
+			pill.className = 'rounded-full bg-white px-3 py-1.5 text-xs font-medium text-ink';
+			pill.textContent = text;
+			specsWrap.appendChild(pill);
+		}
 
-		const body = document.createElement('div');
-		body.className = 'flex flex-1 flex-col gap-1 p-3';
+		imageWrap.append(img, availabilityWrap, specsWrap);
 
-		const rentP = document.createElement('p');
-		rentP.className = 'text-lg font-bold text-gray-900';
-		rentP.textContent = formatRent(listing.rent);
-		const perMonth = document.createElement('span');
-		perMonth.className = 'text-sm font-normal text-gray-500';
-		perMonth.textContent = '/mo';
-		rentP.appendChild(perMonth);
+		const content = document.createElement('div');
+		content.className = 'flex items-end justify-between gap-3 px-2 pt-4 pb-2';
 
-		const typeP = document.createElement('p');
-		typeP.className = 'text-sm text-gray-700';
-		typeP.textContent = `${typeLabel} · ${listing.bedrooms} bed${listing.bedrooms === 1 ? '' : 's'}`;
+		const textWrap = document.createElement('div');
+		textWrap.className = 'min-w-0';
+
+		const heading = document.createElement('h3');
+		heading.className = 'font-heading text-lg font-normal text-ink';
+		heading.textContent = `${typeLabel} in ${listing.area}`;
 
 		const locationP = document.createElement('p');
-		locationP.className = 'text-sm text-gray-500';
+		locationP.className = 'mt-1 text-sm text-neutral-600';
 		locationP.textContent = `${listing.area}, ${listing.city}`;
 
-		body.append(rentP, typeP, locationP);
-		link.append(imageWrap, body);
-		li.appendChild(link);
+		textWrap.append(heading, locationP);
 
-		return li;
+		const priceBadge = document.createElement('span');
+		priceBadge.className =
+			'shrink-0 rounded-full bg-peach px-3 py-1.5 font-heading text-sm whitespace-nowrap text-ink';
+		priceBadge.textContent = `${formatRent(listing.rent)}/mo`;
+
+		content.append(textWrap, priceBadge);
+		card.append(imageWrap, content);
+
+		return card;
 	}
 
 	function render() {
 		const criteria = readCriteria();
 		const results = filterListings(allListings, criteria);
 
-		listEl.innerHTML = '';
+		list.innerHTML = '';
 		for (const listing of results) {
-			listEl.appendChild(renderCard(listing));
+			list.appendChild(renderCard(listing));
 		}
+		// Freshly-created nodes — the global call in Layout.astro ran before
+		// they existed, so this grid needs its own pass to pick up their
+		// `.zoom-in-view` cover photos.
+		initZoomOnView(list);
 
-		countEl.textContent = `${results.length} listing${results.length === 1 ? '' : 's'}`;
+		count.textContent = `${results.length} listing${results.length === 1 ? '' : 's'}`;
 
 		const isEmpty = results.length === 0;
-		noResultsEl.classList.toggle('hidden', !isEmpty);
-		listEl.classList.toggle('hidden', isEmpty);
+		noResults.classList.toggle('hidden', !isEmpty);
+		list.classList.toggle('hidden', isEmpty);
 	}
 
 	populateAreaOptions('');

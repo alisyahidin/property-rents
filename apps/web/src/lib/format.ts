@@ -1,7 +1,7 @@
 // Shared display-formatting helpers for Listing fields.
 //
 // Rent formatting and property-type-label casing each need to render
-// identically in three places: the server-rendered ListingCard.astro, the
+// identically in three places: the server-rendered PropertyCard.astro, the
 // server-rendered Listing detail page ([slug].astro), and the client-side
 // filter island's card renderer (src/scripts/listingFilters.ts). Centralizing
 // them here means a future change to either only needs to happen once.
