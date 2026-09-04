@@ -10,9 +10,9 @@ See `docs/specs/phase1-browse-search-listings.md` (Implementation Decisions: "Qu
 
 **Status:** ready-for-agent
 
-- [ ] `filterListings(listings, criteria)` implemented as a pure, framework-agnostic function
-- [ ] Supports all criteria fields: `propertyType`, `city`, `area`, `minBedrooms`, `maxBedrooms`, `minRent`, `maxRent`, `availability`
-- [ ] Omitted/undefined criteria fields impose no filter (an empty `criteria` object returns everything, sorted)
-- [ ] Default sort order is by Rent ascending
-- [ ] Vitest suite covers: each filter dimension individually, multiple filters combined, the empty-result case, and default sort order
-- [ ] `pnpm test` (or equivalent) passes
+- [x] `filterListings(listings, criteria)` implemented as a pure, framework-agnostic function
+- [x] Supports all criteria fields: `propertyType`, `city`, `area`, `minBedrooms`, `maxBedrooms`, `minRent`, `maxRent`, `availability`
+- [x] Omitted/undefined criteria fields impose no filter (an empty `criteria` object returns everything, sorted)
+- [x] Default sort order is by Rent ascending
+- [x] Vitest suite covers: each filter dimension individually, multiple filters combined, the empty-result case, and default sort order
+- [x] `pnpm test` (or equivalent) passes
