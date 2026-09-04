@@ -9,6 +9,7 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import AvailabilityBadge from "../../components/AvailabilityBadge.astro";
+import { formatRent, propertyTypeLabel as formatPropertyTypeLabel } from "../../lib/format";
 
 export async function getStaticPaths() {
 	const listings = await getCollection("listings");
@@ -25,12 +26,8 @@ interface Props {
 const { listing } = Astro.props;
 const { rent, propertyType, city, area, bedrooms, gallery, availability, agent } = listing.data;
 
-const propertyTypeLabel = propertyType.charAt(0).toUpperCase() + propertyType.slice(1);
-const rentFormatted = new Intl.NumberFormat("en-US", {
-	style: "currency",
-	currency: "USD",
-	maximumFractionDigits: 0,
-}).format(rent);
+const propertyTypeLabel = formatPropertyTypeLabel(propertyType);
+const rentFormatted = formatRent(rent);
 const bedroomsLabel = `${bedrooms} ${bedrooms === 1 ? "bedroom" : "bedrooms"}`;
 const pageTitle = `${propertyTypeLabel} in ${area}, ${city} — Property Rents`;
 
