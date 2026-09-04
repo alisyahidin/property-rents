@@ -10,12 +10,12 @@ See `docs/specs/phase1-browse-search-listings.md` (Implementation Decisions: "Re
 
 **Status:** ready-for-agent
 
-- [ ] Filter controls exist for: Property Type, City, Area (Area options scoped to the selected City), min/max bedrooms, min/max Rent, Availability
-- [ ] Changing any filter updates the visible list client-side with no full page reload, via `filterListings`
-- [ ] Multiple filters combine correctly (AND semantics across dimensions)
-- [ ] Current match count is displayed and updates with filters
-- [ ] A "clear all filters" control resets to the full unfiltered list
-- [ ] An empty result set shows a clear "no results" message instead of a blank list
-- [ ] Filtered results remain sorted by Rent ascending (or whatever order `filterListings` returns)
-- [ ] Usable on a small (phone-width) screen
-- [ ] Verified manually via dev server: each filter dimension alone, combined filters, clear-all, and the no-results state
+- [x] Filter controls exist for: Property Type, City, Area (Area options scoped to the selected City), min/max bedrooms, min/max Rent, Availability
+- [x] Changing any filter updates the visible list client-side with no full page reload, via `filterListings`
+- [x] Multiple filters combine correctly (AND semantics across dimensions)
+- [x] Current match count is displayed and updates with filters
+- [x] A "clear all filters" control resets to the full unfiltered list
+- [x] An empty result set shows a clear "no results" message instead of a blank list
+- [x] Filtered results remain sorted by Rent ascending (or whatever order `filterListings` returns)
+- [x] Usable on a small (phone-width) screen
+- [x] Verified manually via dev server: each filter dimension alone, combined filters, clear-all, and the no-results state
