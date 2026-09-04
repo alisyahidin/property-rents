@@ -10,10 +10,10 @@ See `docs/specs/phase1-browse-search-listings.md` (Implementation Decisions: "De
 
 **Status:** ready-for-agent
 
-- [ ] One static page per Listing exists at build time via `getStaticPaths`, slug derived from the Content Collection entry id
-- [ ] Page shows the full Gallery (all images, in order), not just the cover photo
-- [ ] Page shows Agent name, phone, email, and photo
-- [ ] Page shows Rent, Property Type, City/Area, bedroom count, and Availability together
-- [ ] `rented` Listings generate a page and are reachable by URL identically to `available` ones
-- [ ] Usable on a small (phone-width) screen
-- [ ] `astro build` succeeds and each seed Listing's detail page renders correctly (verify manually via dev server)
+- [x] One static page per Listing exists at build time via `getStaticPaths`, slug derived from the Content Collection entry id
+- [x] Page shows the full Gallery (all images, in order), not just the cover photo
+- [x] Page shows Agent name, phone, email, and photo
+- [x] Page shows Rent, Property Type, City/Area, bedroom count, and Availability together
+- [x] `rented` Listings generate a page and are reachable by URL identically to `available` ones
+- [x] Usable on a small (phone-width) screen
+- [x] `astro build` succeeds and each seed Listing's detail page renders correctly (verify manually via dev server)

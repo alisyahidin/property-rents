@@ -1,0 +1,125 @@
+---
+// Ticket 05: static per-Listing detail page.
+// One page per Listing generated at build time via getStaticPaths, slug
+// derived from the Content Collection entry id (the seed JSON filename,
+// e.g. `downtown-loft-apartment`). `rented` Listings are generated and
+// reachable exactly like `available` ones — never removed or 404'd, so a
+// bookmarked/shared link keeps working (CONTEXT.md's Availability
+// definition; spec user story 21).
+import { getCollection, type CollectionEntry } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import AvailabilityBadge from "../../components/AvailabilityBadge.astro";
+
+export async function getStaticPaths() {
+	const listings = await getCollection("listings");
+	return listings.map((listing) => ({
+		params: { slug: listing.id },
+		props: { listing },
+	}));
+}
+
+interface Props {
+	listing: CollectionEntry<"listings">;
+}
+
+const { listing } = Astro.props;
+const { rent, propertyType, city, area, bedrooms, gallery, availability, agent } = listing.data;
+
+const propertyTypeLabel = propertyType.charAt(0).toUpperCase() + propertyType.slice(1);
+const rentFormatted = new Intl.NumberFormat("en-US", {
+	style: "currency",
+	currency: "USD",
+	maximumFractionDigits: 0,
+}).format(rent);
+const bedroomsLabel = `${bedrooms} ${bedrooms === 1 ? "bedroom" : "bedrooms"}`;
+const pageTitle = `${propertyTypeLabel} in ${area}, ${city} — Property Rents`;
+---
+
+<Layout title={pageTitle}>
+	<main class="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+		<nav class="mb-4 text-sm">
+			<a href="/" class="text-blue-600 hover:underline">&larr; Back to listings</a>
+		</nav>
+
+		<header class="mb-6 flex flex-wrap items-start justify-between gap-3">
+			<div>
+				<h1 class="text-2xl font-semibold text-gray-900 sm:text-3xl">
+					{propertyTypeLabel} in {area}, {city}
+				</h1>
+				<p class="mt-1 text-lg font-medium text-gray-700">{rentFormatted} / month</p>
+			</div>
+			<AvailabilityBadge availability={availability} />
+		</header>
+
+		<section aria-label="Gallery" class="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
+			{
+				gallery.map((imageUrl, index) => (
+					<img
+						src={imageUrl}
+						alt={`${propertyTypeLabel} in ${area}, ${city} — photo ${index + 1} of ${gallery.length}`}
+						class="h-64 w-full rounded-lg object-cover"
+						loading={index === 0 ? "eager" : "lazy"}
+					/>
+				))
+			}
+		</section>
+
+		<section aria-labelledby="details-heading" class="mb-8 rounded-lg border border-gray-200 p-4 sm:p-6">
+			<h2 id="details-heading" class="mb-4 text-lg font-semibold text-gray-900">
+				Details
+			</h2>
+			<dl class="grid grid-cols-2 gap-x-4 gap-y-4 text-sm sm:grid-cols-3">
+				<div>
+					<dt class="text-gray-500">Rent</dt>
+					<dd class="font-medium text-gray-900">{rentFormatted} / month</dd>
+				</div>
+				<div>
+					<dt class="text-gray-500">Property Type</dt>
+					<dd class="font-medium text-gray-900">{propertyTypeLabel}</dd>
+				</div>
+				<div>
+					<dt class="text-gray-500">City / Area</dt>
+					<dd class="font-medium text-gray-900">{city} / {area}</dd>
+				</div>
+				<div>
+					<dt class="text-gray-500">Bedrooms</dt>
+					<dd class="font-medium text-gray-900">{bedroomsLabel}</dd>
+				</div>
+				<div>
+					<dt class="text-gray-500">Availability</dt>
+					<dd class="font-medium text-gray-900">
+						<AvailabilityBadge availability={availability} />
+					</dd>
+				</div>
+			</dl>
+		</section>
+
+		<section aria-labelledby="agent-heading" class="rounded-lg border border-gray-200 p-4 sm:p-6">
+			<h2 id="agent-heading" class="mb-4 text-lg font-semibold text-gray-900">
+				Contact the Agent
+			</h2>
+			<div class="flex items-center gap-4">
+				<img
+					src={agent.photo}
+					alt={agent.name}
+					class="h-16 w-16 flex-shrink-0 rounded-full object-cover"
+				/>
+				<div class="min-w-0">
+					<p class="font-medium text-gray-900">{agent.name}</p>
+					<p class="text-sm text-gray-600">{agent.phone}</p>
+					<p class="text-sm text-gray-600">{agent.email}</p>
+				</div>
+			</div>
+
+			{
+				availability === "available" && (
+					<div class="mt-4" data-testid="inquiry-action">
+						{/* Ticket 06: Inquiry mailto: action (subject/body referencing
+						this Listing, addressed to agent.email) renders here. Omitted
+						entirely for `rented` Listings per spec user story 22. */}
+					</div>
+				)
+			}
+		</section>
+	</main>
+</Layout>
