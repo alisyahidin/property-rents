@@ -1,0 +1,19 @@
+{
+  "rent": 1800,
+  "propertyType": "apartment",
+  "city": "Portland",
+  "area": "Riverside",
+  "bedrooms": 2,
+  "gallery": [
+    "https://picsum.photos/seed/riverside-apt-1/1200/800",
+    "https://picsum.photos/seed/riverside-apt-2/1200/800",
+    "https://picsum.photos/seed/riverside-apt-3/1200/800"
+  ],
+  "availability": "rented",
+  "agent": {
+    "name": "Elena Cho",
+    "phone": "+1-503-555-0111",
+    "email": "elena.cho@example-agency.com",
+    "photo": "https://picsum.photos/seed/agent-elena/400/400"
+  }
+}

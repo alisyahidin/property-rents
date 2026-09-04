@@ -12,8 +12,8 @@ See `docs/specs/phase1-browse-search-listings.md` (Implementation Decisions, Tes
 
 **Status:** ready-for-agent
 
-- [ ] `src/content/config.ts` (or equivalent) defines a `listings` collection with a Zod schema covering all fields above (including Agent `email`), field/enum names matching CONTEXT.md exactly
-- [ ] A handful of seed Listing entries exist, covering both Availability values and a spread of Property Types/Cities/Areas/bedroom counts/Rents
-- [ ] An intentionally malformed entry fails `astro build` / `astro check` (verify manually, then remove it — don't ship it)
-- [ ] Vitest is installed and runnable via a package script (e.g. `pnpm --filter web test` or workspace-root equivalent), with at least one smoke test passing
-- [ ] `astro build` succeeds with the seed data in place
+- [x] `src/content/config.ts` (or equivalent) defines a `listings` collection with a Zod schema covering all fields above (including Agent `email`), field/enum names matching CONTEXT.md exactly
+- [x] A handful of seed Listing entries exist, covering both Availability values and a spread of Property Types/Cities/Areas/bedroom counts/Rents
+- [x] An intentionally malformed entry fails `astro build` / `astro check` (verify manually, then remove it — don't ship it)
+- [x] Vitest is installed and runnable via a package script (e.g. `pnpm --filter web test` or workspace-root equivalent), with at least one smoke test passing
+- [x] `astro build` succeeds with the seed data in place
