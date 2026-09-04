@@ -1,0 +1,3 @@
+# Single agency, no multi-tenancy
+
+The initial brief ("property agents...to rent their properties") read like a multi-agent marketplace, but the site is for one agency's own inventory. We deliberately don't model an Agency entity, agent accounts, or per-agent ownership of Listings — every Listing belongs to the same implicit agency, and Agent is just contact info on a Listing, not a login. Retrofitting multi-tenancy later (ownership, per-agent auth, data isolation) would mean redesigning the Listing schema and adding auth from scratch, so this is worth recording now rather than let the marketplace framing quietly creep back in.
