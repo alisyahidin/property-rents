@@ -1,5 +1,6 @@
 ---
 import type { Listing } from '../lib/filterListings';
+import { formatRent, propertyTypeLabel as formatPropertyTypeLabel } from '../lib/format';
 
 interface Props {
 	listing: Listing;
@@ -7,14 +8,9 @@ interface Props {
 
 const { listing } = Astro.props;
 
-const rentFormatted = new Intl.NumberFormat('en-US', {
-	style: 'currency',
-	currency: 'USD',
-	maximumFractionDigits: 0,
-}).format(listing.rent);
+const rentFormatted = formatRent(listing.rent);
 
-const propertyTypeLabel =
-	listing.propertyType.charAt(0).toUpperCase() + listing.propertyType.slice(1);
+const propertyTypeLabel = formatPropertyTypeLabel(listing.propertyType);
 
 const bedroomsLabel = `${listing.bedrooms} bed${listing.bedrooms === 1 ? '' : 's'}`;
 
