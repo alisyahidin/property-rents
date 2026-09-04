@@ -1,0 +1,239 @@
+---
+// About page, styled to the reference site's /about (hero → stats → story →
+// expertise → team → CTA). Content is grounded in what Phase 1 actually is:
+// stats are computed from the real Content Collection rather than invented
+// sales numbers, and "Meet the Agents" uses the real agents already on our
+// listings (deduped by email) instead of a fabricated team roster — this
+// site has no separate agents/team data model (CONTEXT.md: Agent is contact
+// info on a Listing, not its own entity), so this is the honest version of
+// that section for our domain.
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Layout from '../../layouts/Layout.astro';
+import Eyebrow from '../../components/Eyebrow';
+import SectionIntro from '../../components/SectionIntro';
+import CtaBand from '../../components/CtaBand';
+import { Reveal, RevealGroup, RevealItem } from '../../components/motion/Reveal';
+import type { Listing } from '../../lib/filterListings';
+
+const entries = await getCollection('listings');
+const listings: Listing[] = entries.map((entry) => ({ id: entry.id, ...entry.data }));
+
+const cityCount = new Set(listings.map((listing) => listing.city)).size;
+const propertyTypeCount = new Set(listings.map((listing) => listing.propertyType)).size;
+
+interface AgentSummary {
+	name: string;
+	phone: string;
+	photo: string;
+	listingCount: number;
+	cities: string[];
+	firstListingId: string;
+}
+
+const agentsByEmail = new Map<string, AgentSummary>();
+for (const listing of listings) {
+	const existing = agentsByEmail.get(listing.agent.email);
+	if (existing) {
+		existing.listingCount += 1;
+		if (!existing.cities.includes(listing.city)) existing.cities.push(listing.city);
+	} else {
+		agentsByEmail.set(listing.agent.email, {
+			name: listing.agent.name,
+			phone: listing.agent.phone,
+			photo: listing.agent.photo,
+			listingCount: 1,
+			cities: [listing.city],
+			firstListingId: listing.id,
+		});
+	}
+}
+const agents = [...agentsByEmail.values()].sort((a, b) => a.name.localeCompare(b.name));
+
+const stats = [
+	{ value: String(listings.length), label: 'Listings on the site' },
+	{ value: String(cityCount), label: 'Cities covered' },
+	{ value: String(propertyTypeCount), label: 'Property types' },
+	{ value: String(agents.length), label: 'Agents on the team' },
+];
+
+const approach = [
+	{
+		title: 'Verified at every build',
+		body: "Every listing is checked against a strict schema before it ships — rent, photos, and an agent are never optional, so a listing page never ships broken.",
+	},
+	{
+		title: 'One inbox per listing',
+		body: "There's no shared contact form. An inquiry on a listing goes straight to the agent who manages that specific place.",
+	},
+	{
+		title: 'Nothing disappears quietly',
+		body: 'A place that gets rented stays on the site, badged as rented, instead of vanishing. Shared links keep working.',
+	},
+];
+---
+
+<Layout title="About — Property Rents">
+	<main>
+		<section class="px-4 pt-32 sm:px-6 sm:pt-40 lg:px-10">
+			<RevealGroup client:load mode="mount" className="mx-auto max-w-6xl">
+				<RevealItem>
+					<Eyebrow text="About Property Rents" />
+				</RevealItem>
+				<RevealItem>
+					<h1
+						class="mt-4 max-w-2xl font-heading text-4xl leading-[1.1] font-normal text-ink sm:text-5xl lg:text-6xl"
+					>
+						One agency, every listing kept honest
+					</h1>
+				</RevealItem>
+				<RevealItem>
+					<p class="mt-4 max-w-lg text-base leading-relaxed text-neutral-600 sm:text-lg">
+						We don't sell homes — we manage rentals, and we publish every one of them in the same
+						place with the same standard: real photos, a real agent, and a status you can trust.
+					</p>
+				</RevealItem>
+			</RevealGroup>
+
+			<Reveal client:load mode="mount" delay={0.3} className="mx-auto mt-10 max-w-6xl overflow-hidden rounded-3xl sm:mt-14">
+				<Image
+					src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=2000&q=80"
+					alt="A modern rental property"
+					class="zoom-in-view h-[340px] w-full object-cover sm:h-[460px]"
+					loading="eager"
+					inferSize
+				/>
+			</Reveal>
+		</section>
+
+		<!-- Stats -->
+		<section class="px-4 py-16 sm:px-6 sm:py-20 lg:px-10">
+			<RevealGroup
+				client:visible
+				className="mx-auto grid max-w-6xl grid-cols-2 gap-8 border-t border-neutral-100 pt-10 sm:grid-cols-4"
+			>
+				{
+					stats.map((stat) => (
+						<RevealItem>
+							<p class="font-heading text-3xl text-ink sm:text-4xl">{stat.value}</p>
+							<p class="mt-1 text-sm text-neutral-600">{stat.label}</p>
+						</RevealItem>
+					))
+				}
+			</RevealGroup>
+		</section>
+
+		<!-- Our approach -->
+		<section class="bg-neutral-50 px-4 py-20 sm:px-6 sm:py-28 lg:px-10">
+			<div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
+				<Reveal client:visible className="grid grid-cols-2 gap-2.5">
+					<div class="aspect-3/4 w-full overflow-hidden rounded-2xl">
+						<Image
+							src="https://images.unsplash.com/photo-1615529182904-14819c35db37?auto=format&fit=crop&w=800&q=80"
+							alt="A modern rental interior"
+							class="zoom-in-view h-full w-full object-cover"
+							loading="lazy"
+							inferSize
+						/>
+					</div>
+					<div class="mt-8 aspect-3/4 w-full overflow-hidden rounded-2xl">
+						<Image
+							src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80"
+							alt="A modern rental bathroom"
+							class="zoom-in-view h-full w-full object-cover"
+							loading="lazy"
+							inferSize
+						/>
+					</div>
+				</Reveal>
+
+				<Reveal client:visible delay={0.1}>
+					<SectionIntro
+						eyebrow="Our Approach"
+						heading="Built as a static site, on purpose"
+						paragraph="Every listing here is a checked-in file, not a database row a form could corrupt. That's a deliberate trade: it means no accounts, no saved searches, no listing goes live without passing validation first — and it means what you're looking at right now is exactly what we published, not a stale cache."
+					/>
+				</Reveal>
+			</div>
+		</section>
+
+		<!-- How we work -->
+		<section class="px-4 py-20 sm:px-6 sm:py-28 lg:px-10">
+			<div class="mx-auto max-w-6xl">
+				<Reveal client:visible>
+					<SectionIntro
+						eyebrow="How We Work"
+						heading="Three habits behind every listing"
+						align="center"
+					/>
+				</Reveal>
+				<RevealGroup client:visible className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-3">
+					{
+						approach.map((item) => (
+							<RevealItem className="rounded-3xl border border-neutral-100 p-7">
+								<h3 class="font-heading text-lg text-ink">{item.title}</h3>
+								<p class="mt-3 text-sm leading-relaxed text-neutral-600">{item.body}</p>
+							</RevealItem>
+						))
+					}
+				</RevealGroup>
+			</div>
+		</section>
+
+		<!-- Meet the agents -->
+		<section class="bg-neutral-50 px-4 py-20 sm:px-6 sm:py-28 lg:px-10">
+			<div class="mx-auto max-w-6xl">
+				<Reveal client:visible>
+					<SectionIntro
+						eyebrow="Meet the Agents"
+						heading="Whoever you email, you'll reach them directly"
+						paragraph="Every listing names the agent who manages it. Here's who's currently on the site."
+						align="center"
+					/>
+				</Reveal>
+				<RevealGroup client:visible className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+					{
+						agents.map((agent) => (
+							<RevealItem>
+								<a
+									href={`/properties/${agent.firstListingId}/`}
+									class="group flex flex-col items-center gap-4 rounded-3xl border border-neutral-100 bg-white p-7 text-center transition-shadow duration-200 hover:shadow-lg"
+								>
+									<div class="h-20 w-20 overflow-hidden rounded-full">
+										<Image
+											src={agent.photo}
+											alt={agent.name}
+											class="zoom-in-view h-full w-full object-cover"
+											loading="lazy"
+											inferSize
+										/>
+									</div>
+									<div>
+										<h3 class="font-heading text-lg text-ink">{agent.name}</h3>
+										<p class="mt-1 text-sm text-neutral-600">
+											{agent.listingCount} listing{agent.listingCount === 1 ? '' : 's'} &middot;{' '}
+											{agent.cities.join(', ')}
+										</p>
+									</div>
+									<span class="font-heading text-sm text-ink underline decoration-neutral-300 decoration-1 underline-offset-4 group-hover:decoration-ink">
+										See a listing
+									</span>
+								</a>
+							</RevealItem>
+						))
+					}
+				</RevealGroup>
+			</div>
+		</section>
+
+		<CtaBand
+			client:visible
+			eyebrow="Explore Property Rents"
+			heading="Find your next place to rent"
+			imageUrl="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=80"
+			imageAlt="A modern rental home exterior at dusk"
+			buttonHref="/properties/"
+			buttonLabel="Properties"
+		/>
+	</main>
+</Layout>

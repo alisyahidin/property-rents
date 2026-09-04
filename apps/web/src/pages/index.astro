@@ -1,8 +1,315 @@
 ---
-import Welcome from '../components/Welcome.astro';
+// Marketing homepage. The functional "browse every listing with filters"
+// page from the Phase 1 spec now lives at /properties — see
+// docs/specs/phase1-browse-search-listings.md and this page's sibling,
+// src/pages/properties/index.astro.
+//
+// Stats and Featured Listings below are computed from the real `listings`
+// Content Collection at build time rather than hardcoded, so they stay true
+// as listings are added, marked rented, or removed.
+//
+// Every marketing component here is React (.tsx). Reveal/RevealGroup drive
+// the scroll-triggered motion — the hero fades in on load (mode="mount",
+// client:load, above the fold); everything else fades up as it scrolls
+// into view (client:visible). Plain SectionIntro/Button/Eyebrow usages that
+// aren't wrapped in a Reveal render to static HTML with zero JS, same as
+// before this component set moved to React.
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
+import Eyebrow from '../components/Eyebrow';
+import Button from '../components/Button';
+import SectionIntro from '../components/SectionIntro';
+import PropertyCard from '../components/PropertyCard';
+import Faq from '../components/Faq';
+import CtaBand from '../components/CtaBand';
+import { Reveal, RevealGroup, RevealItem } from '../components/motion/Reveal';
+import Parallax from '../components/motion/Parallax';
+import { filterListings, type Listing, type PropertyType } from '../lib/filterListings';
+
+const entries = await getCollection('listings');
+const listings: Listing[] = entries.map((entry) => ({ id: entry.id, ...entry.data }));
+
+const available = filterListings(listings, { availability: 'available' });
+const cityCount = new Set(listings.map((listing) => listing.city)).size;
+
+// One listing per Property Type where possible, so Featured Listings shows
+// real variety rather than three of the same kind.
+const featured: Listing[] = [];
+const seenTypes = new Set<PropertyType>();
+for (const listing of available) {
+	if (featured.length >= 3) break;
+	if (seenTypes.has(listing.propertyType)) continue;
+	featured.push(listing);
+	seenTypes.add(listing.propertyType);
+}
+for (const listing of available) {
+	if (featured.length >= 3) break;
+	if (!featured.includes(listing)) featured.push(listing);
+}
+
+const whyRentWithUs = [
+	{
+		title: 'Schema-verified listings',
+		body: "Every listing is checked against a strict schema before it ships, so what you see here is never missing a price, a photo, or an agent.",
+	},
+	{
+		title: 'Direct to the agent',
+		body: "Send an inquiry and it lands in the actual listing agent's inbox — no ticketing queue, no third party in between.",
+	},
+	{
+		title: "Availability you can trust",
+		body: "A listing that's rented stays up, badged, instead of disappearing. Bookmarked or shared links never quietly break.",
+	},
+	{
+		title: 'The whole gallery, every time',
+		body: 'Every listing shows its full set of photos on the detail page, not just a single cover shot.',
+	},
+];
+
+const steps = [
+	{
+		step: '01',
+		title: 'Browse & filter',
+		body: 'Narrow by property type, city, area, bedrooms, rent, and availability. Results update instantly, no reloads.',
+	},
+	{
+		step: '02',
+		title: 'Open a listing',
+		body: "See the full photo gallery, the rent, and every detail — property type, bedrooms, city and area — in one place.",
+	},
+	{
+		step: '03',
+		title: 'Email the agent',
+		body: "Send a pre-filled inquiry straight to that listing's agent. No forms, no waiting on hold.",
+	},
+];
+
+const testimonials = [
+	{
+		quote:
+			'I filtered by bedrooms and rent, and had three places worth touring by lunchtime.',
+		name: 'Jordan M.',
+		city: 'Austin',
+	},
+	{
+		quote: 'Emailed the agent straight from the listing page. Got a reply that same afternoon.',
+		name: 'Priya S.',
+		city: 'Denver',
+	},
+	{
+		quote: "The rented badge saved me a wasted trip to a place that was already gone.",
+		name: 'Sam R.',
+		city: 'Seattle',
+	},
+];
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Property Rents — Find Your Next Place to Rent">
+	<main>
+		<!-- Hero -->
+		<section class="relative flex h-[92vh] min-h-160 w-full items-end overflow-hidden">
+			<Parallax client:load className="absolute inset-0">
+				<Image
+					src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=2000&q=80"
+					alt="A modern rental home at dusk"
+					class="zoom-in-view h-full w-full object-cover"
+					loading="eager"
+					inferSize
+				/>
+			</Parallax>
+			<div class="absolute inset-0 bg-linear-to-t from-ink/80 via-ink/10 to-ink/5"></div>
+
+			<div class="relative w-full px-4 pb-16 sm:px-6 sm:pb-20 lg:px-10">
+				<RevealGroup client:load mode="mount" className="mx-auto flex max-w-6xl flex-col gap-6">
+					<RevealItem>
+						<Eyebrow text="Direct From the Agency" tone="white" />
+					</RevealItem>
+					<RevealItem>
+						<h1
+							class="max-w-3xl font-heading text-4xl leading-[1.05] font-normal text-white sm:text-6xl lg:text-7xl"
+						>
+							Find your next place to rent
+						</h1>
+					</RevealItem>
+					<RevealItem>
+						<p class="max-w-lg text-base leading-relaxed text-white/80 sm:text-lg">
+							Browse every listing we manage — filter by city, bedrooms, and rent, then reach the
+							agent for the one you like by email. No sign-up, no middlemen.
+						</p>
+					</RevealItem>
+					<RevealItem className="pt-2">
+						<Button href="/properties/">Properties</Button>
+					</RevealItem>
+				</RevealGroup>
+			</div>
+		</section>
+
+		<!-- About -->
+		<section id="about" class="px-4 py-20 sm:px-6 sm:py-28 lg:px-10">
+			<div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20">
+				<Reveal client:visible className="overflow-hidden rounded-3xl">
+					<Image
+						src="https://images.unsplash.com/photo-1560185127-6ed189bf02f4?auto=format&fit=crop&w=1200&q=80"
+						alt="A modern rental property exterior"
+						class="zoom-in-view h-full max-h-130 w-full object-cover"
+						loading="lazy"
+						inferSize
+					/>
+				</Reveal>
+
+				<Reveal client:visible delay={0.1} className="flex flex-col gap-8">
+					<SectionIntro
+						eyebrow="About Property Rents"
+						heading="One agency, every listing kept current"
+						paragraph="We publish every place we manage in one spot — rent, property type, city and area, bedroom count, and full photos, checked before it ever ships. If a place gets rented, the page stays up and says so."
+					/>
+					<a
+						href="/about/"
+						class="font-heading text-sm text-ink underline decoration-neutral-300 decoration-1 underline-offset-4 hover:decoration-ink"
+					>
+						Read more about how we work
+					</a>
+					<div class="grid grid-cols-3 gap-6 border-t border-neutral-100 pt-8">
+						<div>
+							<p class="font-heading text-3xl text-ink sm:text-4xl">{available.length}</p>
+							<p class="mt-1 text-sm text-neutral-600">Available now</p>
+						</div>
+						<div>
+							<p class="font-heading text-3xl text-ink sm:text-4xl">{cityCount}</p>
+							<p class="mt-1 text-sm text-neutral-600">Cities covered</p>
+						</div>
+						<div>
+							<p class="font-heading text-3xl text-ink sm:text-4xl">100%</p>
+							<p class="mt-1 text-sm text-neutral-600">Direct to agent</p>
+						</div>
+					</div>
+				</Reveal>
+			</div>
+		</section>
+
+		<!-- Featured listings -->
+		<section class="bg-neutral-50 px-4 py-20 sm:px-6 sm:py-28 lg:px-10">
+			<div class="mx-auto max-w-6xl">
+				<Reveal client:visible className="flex flex-col justify-between gap-8 sm:flex-row sm:items-end">
+					<SectionIntro
+						eyebrow="Featured Listings"
+						heading="A place for every kind of stay"
+						paragraph="One of each property type we currently have available — the rest are on the full listings page."
+					/>
+					<div class="shrink-0">
+						<Button href="/properties/" variant="inverted">Browse Properties</Button>
+					</div>
+				</Reveal>
+
+				{
+					featured.length > 0 ? (
+						<div class="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+							{featured.map((listing, index) => (
+								<PropertyCard client:visible listing={listing} delay={index * 0.08} />
+							))}
+						</div>
+					) : (
+						<p class="mt-12 text-neutral-600">
+							Nothing's available right now — check the full listings page for what's coming up.
+						</p>
+					)
+				}
+			</div>
+		</section>
+
+		<!-- Why rent with us -->
+		<section class="px-4 py-20 sm:px-6 sm:py-28 lg:px-10">
+			<div class="mx-auto max-w-6xl">
+				<Reveal client:visible>
+					<SectionIntro
+						eyebrow="Why Property Rents"
+						heading="Built so nothing you see is stale or fake"
+						align="center"
+					/>
+				</Reveal>
+				<RevealGroup client:visible className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+					{
+						whyRentWithUs.map((item) => (
+							<RevealItem className="rounded-3xl border border-neutral-100 p-7">
+								<h3 class="font-heading text-lg text-ink">{item.title}</h3>
+								<p class="mt-3 text-sm leading-relaxed text-neutral-600">{item.body}</p>
+							</RevealItem>
+						))
+					}
+				</RevealGroup>
+			</div>
+		</section>
+
+		<!-- How it works -->
+		<section class="bg-neutral-50 px-4 py-20 sm:px-6 sm:py-28 lg:px-10">
+			<div class="mx-auto max-w-6xl">
+				<Reveal client:visible>
+					<SectionIntro
+						eyebrow="How It Works"
+						heading="Three steps from browsing to move-in talk"
+						align="center"
+					/>
+				</Reveal>
+				<RevealGroup client:visible className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-3">
+					{
+						steps.map((item) => (
+							<RevealItem className="rounded-3xl border border-neutral-100 bg-white p-7">
+								<span class="font-heading text-sm text-neutral-400">{item.step}</span>
+								<h3 class="mt-4 font-heading text-lg text-ink">{item.title}</h3>
+								<p class="mt-3 text-sm leading-relaxed text-neutral-600">{item.body}</p>
+							</RevealItem>
+						))
+					}
+				</RevealGroup>
+			</div>
+		</section>
+
+		<!-- FAQ -->
+		<section class="px-4 py-20 sm:px-6 sm:py-28 lg:px-10">
+			<div class="mx-auto max-w-6xl">
+				<Reveal client:visible className="flex flex-col justify-between gap-8 sm:flex-row sm:items-end">
+					<SectionIntro eyebrow="Common Questions" heading="Frequently asked questions" />
+					<p class="max-w-sm shrink-0 text-sm leading-relaxed text-neutral-600 sm:text-base">
+						Everything visitors usually ask before reaching out to an agent — no account, no
+						ticketing queue, just straight answers.
+					</p>
+				</Reveal>
+				<div class="mt-12">
+					<Faq client:visible />
+				</div>
+			</div>
+		</section>
+
+		<!-- Testimonials -->
+		<section class="px-4 py-20 sm:px-6 sm:py-28 lg:px-10">
+			<div class="mx-auto max-w-6xl">
+				<Reveal client:visible>
+					<SectionIntro eyebrow="Renter Notes" heading="What renters say after using it" />
+				</Reveal>
+				<RevealGroup client:visible className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-3">
+					{
+						testimonials.map((item) => (
+							<RevealItem className="flex flex-col justify-between gap-6 rounded-3xl bg-neutral-50 p-7">
+								<p class="font-heading text-lg leading-snug text-ink">“{item.quote}”</p>
+								<p class="text-sm text-neutral-600">
+									{item.name} — {item.city}
+								</p>
+							</RevealItem>
+						))
+					}
+				</RevealGroup>
+			</div>
+		</section>
+
+		<CtaBand
+			client:visible
+			eyebrow="Explore Property Rents"
+			heading="Find your next place to rent"
+			imageUrl="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1800&q=80"
+			imageAlt="A modern rental home exterior"
+			buttonHref="/properties/"
+			buttonLabel="Properties"
+		/>
+	</main>
 </Layout>

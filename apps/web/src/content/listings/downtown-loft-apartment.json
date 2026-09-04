@@ -1,0 +1,19 @@
+{
+  "rent": 1450,
+  "propertyType": "apartment",
+  "city": "Austin",
+  "area": "Downtown",
+  "bedrooms": 1,
+  "gallery": [
+    "https://picsum.photos/seed/downtown-loft-1/1200/800",
+    "https://picsum.photos/seed/downtown-loft-2/1200/800",
+    "https://picsum.photos/seed/downtown-loft-3/1200/800"
+  ],
+  "availability": "available",
+  "agent": {
+    "name": "Priya Nair",
+    "phone": "+1-512-555-0142",
+    "email": "priya.nair@example-agency.com",
+    "photo": "https://picsum.photos/seed/agent-priya/400/400"
+  }
+}

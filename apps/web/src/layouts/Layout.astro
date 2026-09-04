@@ -1,5 +1,14 @@
 ---
 import "../styles/global.css";
+import Nav from "../components/Nav";
+import Footer from "../components/Footer";
+import SmoothScroll from "../components/motion/SmoothScroll";
+
+interface Props {
+	title?: string;
+}
+
+const { title = "Property Rents" } = Astro.props;
 ---
 
 <!doctype html>
@@ -10,9 +19,30 @@ import "../styles/global.css";
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<title>{title}</title>
+		<!--
+			Fonts load as real <link> tags, not a CSS @import (global.css used to
+			@import this same URL) — an @import sitting ahead of Tailwind's
+			compiled CSS in the same file blocks the browser from applying any of
+			it until the import resolves, which reads as a blank/unstyled flash
+			on a cold load. <link> tags are discovered by the preload scanner
+			straight off the raw HTML and fetched in parallel instead.
+		-->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&display=swap"
+		/>
 	</head>
-	<body>
+	<body class="bg-white font-body text-ink antialiased">
+		<SmoothScroll client:load />
+		<Nav client:load />
 		<slot />
+		<Footer />
+		<script>
+			import { initZoomOnView } from '../scripts/zoomOnView';
+			initZoomOnView();
+		</script>
 	</body>
 </html>
