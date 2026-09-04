@@ -12,9 +12,9 @@ See `docs/specs/phase1-browse-search-listings.md` (Implementation Decisions: "Re
 
 **Status:** ready-for-agent
 
-- [ ] Index page renders every Listing from the `listings` Content Collection at build time
-- [ ] Sort order comes from `filterListings(listings, {})`, not separately re-implemented
-- [ ] Each list item shows: Rent, Property Type, City/Area, bedroom count, cover photo, Availability badge
-- [ ] Layout is usable on a small (phone-width) screen
-- [ ] Full Listing set is embedded as a serialized payload on the page, in a shape ticket 04 can consume directly for client-side filtering
-- [ ] `astro build` succeeds and the page renders correctly with seed data (verify manually via dev server)
+- [x] Index page renders every Listing from the `listings` Content Collection at build time
+- [x] Sort order comes from `filterListings(listings, {})`, not separately re-implemented
+- [x] Each list item shows: Rent, Property Type, City/Area, bedroom count, cover photo, Availability badge
+- [x] Layout is usable on a small (phone-width) screen
+- [x] Full Listing set is embedded as a serialized payload on the page, in a shape ticket 04 can consume directly for client-side filtering
+- [x] `astro build` succeeds and the page renders correctly with seed data (verify manually via dev server)

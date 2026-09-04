@@ -1,8 +1,51 @@
 ---
-import Welcome from '../components/Welcome.astro';
+import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
+import ListingCard from '../components/ListingCard.astro';
+import { filterListings, type Listing } from '../lib/filterListings';
+
+const entries = await getCollection('listings');
+
+const listings: Listing[] = entries.map((entry) => ({
+	id: entry.id,
+	...entry.data,
+}));
+
+// Default view: full set, sorted in the shared, consistent order (by Rent
+// ascending) — reuses filterListings rather than re-implementing sort logic.
+const sortedListings = filterListings(listings, {});
+
+// Full (unfiltered, unsorted-beyond-collection-order) Listing array, embedded
+// as JSON for ticket 04's client-side filter island. The island is expected
+// to call `filterListings(listings, criteria)` itself, so this payload does
+// not need to be pre-sorted or pre-filtered.
+const listingsPayload = JSON.stringify(listings).replace(/</g, '\\u003c');
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Property Rents — Browse Listings">
+	<main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+		<header class="mb-6">
+			<h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">Available Rentals</h1>
+			<p class="mt-1 text-sm text-gray-500" id="results-count">
+				{sortedListings.length} listing{sortedListings.length === 1 ? '' : 's'}
+			</p>
+		</header>
+
+		{
+			sortedListings.length === 0 ? (
+				<p class="text-gray-600">No listings are available right now. Please check back soon.</p>
+			) : (
+				<ul
+					id="listings-list"
+					class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+				>
+					{sortedListings.map((listing) => (
+						<ListingCard listing={listing} />
+					))}
+				</ul>
+			)
+		}
+	</main>
+
+	<script type="application/json" id="listings-data" set:html={listingsPayload} />
 </Layout>
