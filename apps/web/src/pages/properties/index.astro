@@ -20,19 +20,14 @@
 // would fight that script instead of cooperating with it. The cards' CSS
 // hover (shadow, image zoom) still works either way; only PropertyCard's own
 // motion.dev entrance/hover-lift is skipped here.
-import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import SectionIntro from '../../components/SectionIntro';
 import PropertyCard from '../../components/PropertyCard';
 import { Reveal } from '../../components/motion/Reveal';
 import { filterListings, type Listing } from '../../lib/filterListings';
+import { fetchListings } from '../../lib/strapi';
 
-const entries = await getCollection('listings');
-
-const listings: Listing[] = entries.map((entry) => ({
-	id: entry.id,
-	...entry.data,
-}));
+const listings: Listing[] = await fetchListings();
 
 // Default view: full set, sorted in the shared, consistent order (by Rent
 // ascending) — reuses filterListings rather than re-implementing sort logic.

@@ -4,9 +4,10 @@
 // docs/specs/phase1-browse-search-listings.md and this page's sibling,
 // src/pages/properties/index.astro.
 //
-// Stats and Featured Listings below are computed from the real `listings`
-// Content Collection at build time rather than hardcoded, so they stay true
-// as listings are added, marked rented, or removed.
+// Stats and Featured Listings below are computed from Strapi at build time
+// (ticket 04's data-source swap — see docs/specs/phase2-strapi-cms.md)
+// rather than hardcoded, so they stay true as listings are added, marked
+// rented, or removed in Strapi.
 //
 // Every marketing component here is React (.tsx). Reveal/RevealGroup drive
 // the scroll-triggered motion — the hero fades in on load (mode="mount",
@@ -14,7 +15,6 @@
 // into view (client:visible). Plain SectionIntro/Button/Eyebrow usages that
 // aren't wrapped in a Reveal render to static HTML with zero JS, same as
 // before this component set moved to React.
-import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
 import Eyebrow from '../components/Eyebrow';
@@ -26,9 +26,9 @@ import CtaBand from '../components/CtaBand';
 import { Reveal, RevealGroup, RevealItem } from '../components/motion/Reveal';
 import Parallax from '../components/motion/Parallax';
 import { filterListings, type Listing, type PropertyType } from '../lib/filterListings';
+import { fetchListings } from '../lib/strapi';
 
-const entries = await getCollection('listings');
-const listings: Listing[] = entries.map((entry) => ({ id: entry.id, ...entry.data }));
+const listings: Listing[] = await fetchListings();
 
 const available = filterListings(listings, { availability: 'available' });
 const cityCount = new Set(listings.map((listing) => listing.city)).size;

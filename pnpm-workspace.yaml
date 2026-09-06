@@ -1,6 +1,12 @@
 packages:
   - "apps/*"
 allowBuilds:
+  '@swc/core': true
+  # better-sqlite3 is knex's optional peer for its sqlite dialect (pulled in
+  # transitively via @strapi/database), never an actual project dependency —
+  # apps/cms uses Postgres (ADR 0004), so this is deliberately false.
+  better-sqlite3: false
+  core-js-pure: true
   esbuild: true
 minimumReleaseAgeExclude:
   - astro@7.3.1

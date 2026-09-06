@@ -1,0 +1,11 @@
+# Strapi-specific paths not already covered by the root .gitignore
+# (node_modules, .env*, dist, build are already handled there).
+.cache
+.strapi
+.strapi-updater.json
+exports
+license.txt
+
+# Regenerated from the committed schema.json files on every develop/build —
+# not a second source of truth to keep in sync by hand.
+types/generated

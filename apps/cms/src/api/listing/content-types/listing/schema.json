@@ -1,0 +1,70 @@
+{
+  "kind": "collectionType",
+  "collectionName": "listings",
+  "info": {
+    "singularName": "listing",
+    "pluralName": "listings",
+    "displayName": "Listing",
+    "description": "A single rental unit published on the site (CONTEXT.md: Listing). Field names mirror CONTEXT.md's vocabulary exactly per ADR 0002."
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "slug": {
+      "type": "uid",
+      "required": true
+    },
+    "rent": {
+      "type": "integer",
+      "required": true,
+      "min": 0
+    },
+    "propertyType": {
+      "type": "enumeration",
+      "enum": [
+        "apartment",
+        "house",
+        "room"
+      ],
+      "required": true
+    },
+    "city": {
+      "type": "string",
+      "required": true
+    },
+    "area": {
+      "type": "string",
+      "required": true
+    },
+    "bedrooms": {
+      "type": "integer",
+      "required": true,
+      "min": 0
+    },
+    "gallery": {
+      "type": "media",
+      "multiple": true,
+      "required": true,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "availability": {
+      "type": "enumeration",
+      "enum": [
+        "available",
+        "rented"
+      ],
+      "required": true,
+      "default": "available"
+    },
+    "agent": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::agent.agent",
+      "inversedBy": "listings"
+    }
+  }
+}

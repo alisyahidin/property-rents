@@ -33,6 +33,10 @@ _Avoid_: Status (too generic on its own — always say Availability when this is
 **Gallery**:
 The ordered set of photos attached to a Listing.
 
+**Draft** / **Published**:
+A Listing's visibility state in Phase 2 (Strapi's built-in Draft & Publish), independent of Availability. A `Published` Listing appears on the site, subject to its Availability; a `Draft` Listing is still being prepared by the Agency and does not appear at all, regardless of Availability. This is what lets the Agency stage a new Listing before it goes live. Availability only has meaning for a `Published` Listing.
+_Avoid_: confusing with Availability — Draft/Published is "is this on the site at all," Availability is "available vs rented" among Listings that are.
+
 **City** / **Area**:
 Location fields on a Listing. City is the city/town; Area is the neighborhood or district within it. Both are free-text attributes on the Listing, not a separate lookup/taxonomy entity.
 

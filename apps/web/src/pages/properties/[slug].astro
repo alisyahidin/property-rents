@@ -1,19 +1,22 @@
 ---
 // Ticket 05: static per-Listing detail page.
 // One page per Listing generated at build time via getStaticPaths, slug
-// derived from the Content Collection entry id (the seed JSON filename,
-// e.g. `downtown-loft-apartment`). `rented` Listings are generated and
-// reachable exactly like `available` ones — never removed or 404'd, so a
-// bookmarked/shared link keeps working (CONTEXT.md's Availability
-// definition; spec user story 21).
-import { getCollection, type CollectionEntry } from "astro:content";
+// coming from Strapi's `slug` field (ticket 04/Phase 2), which the
+// migration set to the original seed filename, e.g.
+// `downtown-loft-apartment` — Phase 1's URLs carry over unchanged even
+// though the data source underneath them didn't. `rented` Listings are
+// generated and reachable exactly like `available` ones — never removed or
+// 404'd, so a bookmarked/shared link keeps working (CONTEXT.md's
+// Availability definition; spec user story 21).
 import { Image } from "astro:assets";
 import Layout from "../../layouts/Layout.astro";
 import AvailabilityBadge from "../../components/AvailabilityBadge.astro";
 import { formatRent, propertyTypeLabel as formatPropertyTypeLabel } from "../../lib/format";
+import { fetchListings } from "../../lib/strapi";
+import type { Listing } from "../../lib/filterListings";
 
 export async function getStaticPaths() {
-	const listings = await getCollection("listings");
+	const listings = await fetchListings();
 	return listings.map((listing) => ({
 		params: { slug: listing.id },
 		props: { listing },
@@ -21,11 +24,11 @@ export async function getStaticPaths() {
 }
 
 interface Props {
-	listing: CollectionEntry<"listings">;
+	listing: Listing;
 }
 
 const { listing } = Astro.props;
-const { rent, propertyType, city, area, bedrooms, gallery, availability, agent } = listing.data;
+const { rent, propertyType, city, area, bedrooms, gallery, availability, agent } = listing;
 
 const propertyTypeLabel = formatPropertyTypeLabel(propertyType);
 const rentFormatted = formatRent(rent);
