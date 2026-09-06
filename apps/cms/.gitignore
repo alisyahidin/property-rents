@@ -5,3 +5,7 @@
 .strapi-updater.json
 exports
 license.txt
+
+# Regenerated from the committed schema.json files on every develop/build —
+# not a second source of truth to keep in sync by hand.
+types/generated
