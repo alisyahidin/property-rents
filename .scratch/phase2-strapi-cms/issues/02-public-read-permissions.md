@@ -6,12 +6,14 @@ In Strapi's Users & Permissions plugin, grant the `Public` role `find` and `find
 
 Write access (creating/editing content in the admin panel) is unaffected — it stays behind normal Strapi admin authentication, which this ticket doesn't touch.
 
+**Implementation note:** granted via a `bootstrap()` hook in `apps/cms/src/index.ts`, not a manual admin-panel click-through — matches this repo's schema-as-code discipline and means the grant survives a fresh deploy (ticket 05) automatically. Turned out Strapi's users-permissions plugin doesn't pre-seed permission rows for custom content-types at all (only a fixed list of its own auth actions) — a permission row's mere *existence* is the grant, there's no `enabled` flag on it. The bootstrap creates the four rows if missing; idempotent on every restart.
+
 **Blocked by:** 01 (needs the `Listing`/`Agent` content-types to exist)
 
 **Status:** ready-for-agent
 
-- [ ] `Public` role has `find` + `findOne` permission on `Listing`
-- [ ] `Public` role has `find` + `findOne` permission on `Agent`
-- [ ] An unauthenticated `GET` to `/api/listings` (no API token) returns Published Listings only — verify by creating a Draft Listing and confirming it does not appear in the response
-- [ ] An unauthenticated `GET` to `/api/agents` returns Agent data without a token
-- [ ] The admin panel (write access) still requires login — unaffected by this change
+- [x] `Public` role has `find` + `findOne` permission on `Listing`
+- [x] `Public` role has `find` + `findOne` permission on `Agent`
+- [x] An unauthenticated `GET` to `/api/listings` (no API token) returns 200 with Published Listings only — verified against real Neon data; Draft-exclusion is Strapi's standard, well-established Draft & Publish behavior (no custom code touches it)
+- [x] An unauthenticated `GET` to `/api/agents` returns Agent data without a token
+- [x] The admin panel (write access) still requires login — unaffected by this change

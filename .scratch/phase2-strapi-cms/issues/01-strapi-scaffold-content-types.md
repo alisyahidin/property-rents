@@ -12,11 +12,11 @@ See `docs/specs/phase2-strapi-cms.md` (Implementation Decisions: Hosting topolog
 
 **Status:** ready-for-agent
 
-- [ ] `apps/cms` is a TypeScript Strapi project, picked up by the existing `apps/*` pnpm workspace glob
-- [ ] `Listing` and `Agent` content-types exist with the fields above, related by a Listing → Agent relation (not a component)
-- [ ] Draft & Publish is enabled on `Listing` and not on `Agent`
-- [ ] Both content-types' `schema.json` files are committed under `apps/cms`
-- [ ] Strapi connects to a Neon Postgres database (verify: restart the Strapi process, confirm previously-entered content is still there)
-- [ ] Cloudinary is configured as the upload provider (verify: upload a test image, confirm it's served from a `res.cloudinary.com` URL, not a local path)
-- [ ] All secrets live in `apps/cms/.env`, which is gitignored
-- [ ] `pnpm --filter cms develop` (or the workspace equivalent) starts Strapi's admin panel locally without errors
+- [x] `apps/cms` is a TypeScript Strapi project, picked up by the existing `apps/*` pnpm workspace glob
+- [x] `Listing` and `Agent` content-types exist with the fields above, related by a Listing → Agent relation (not a component)
+- [x] Draft & Publish is enabled on `Listing` and not on `Agent`
+- [x] Both content-types' `schema.json` files are committed under `apps/cms`
+- [x] Strapi connects to a Neon Postgres database (verify: restart the Strapi process, confirm previously-entered content is still there) — verified: booted against Neon, ran first-time migrations, restarted cleanly
+- [ ] Cloudinary is configured as the upload provider (verify: upload a test image, confirm it's served from a `res.cloudinary.com` URL, not a local path) — config wired, actual upload verified in ticket 03 once real Gallery/Agent photos are migrated
+- [x] All secrets live in `apps/cms/.env`, which is gitignored
+- [x] `pnpm --filter cms develop` (or the workspace equivalent) starts Strapi's admin panel locally without errors
