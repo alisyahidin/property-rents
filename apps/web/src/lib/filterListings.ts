@@ -5,11 +5,13 @@
 // the browser (the client-side filter island) — see
 // docs/specs/phase1-browse-search-listings.md, "Query/filter seam".
 //
-// `Listing` here is the flat shape callers build from a `listings` Content
-// Collection entry (ticket 01, `src/content.config.ts`): the entry's `id`
-// alongside its schema fields spread at the top level, e.g.
-// `{ id: entry.id, ...entry.data }`. Field names and types mirror that
-// schema exactly.
+// `Listing` here is a flat shape, unchanged by Phase 2's data-source swap
+// (docs/specs/phase2-strapi-cms.md, ticket 04): Phase 1 built it from a
+// `listings` Content Collection entry (`{ id: entry.id, ...entry.data }`);
+// now `src/lib/strapi.ts`'s `mapStrapiListing` builds the exact same shape
+// from Strapi's API response instead. Neither `filterListings` nor its
+// tests changed at all — this is the seam ADR 0002's migration promise
+// depended on.
 
 export type PropertyType = 'apartment' | 'house' | 'room';
 

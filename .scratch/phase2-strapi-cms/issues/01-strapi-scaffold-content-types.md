@@ -17,6 +17,8 @@ See `docs/specs/phase2-strapi-cms.md` (Implementation Decisions: Hosting topolog
 - [x] Draft & Publish is enabled on `Listing` and not on `Agent`
 - [x] Both content-types' `schema.json` files are committed under `apps/cms`
 - [x] Strapi connects to a Neon Postgres database (verify: restart the Strapi process, confirm previously-entered content is still there) — verified: booted against Neon, ran first-time migrations, restarted cleanly
-- [ ] Cloudinary is configured as the upload provider (verify: upload a test image, confirm it's served from a `res.cloudinary.com` URL, not a local path) — config wired, actual upload verified in ticket 03 once real Gallery/Agent photos are migrated
+- [x] Cloudinary is configured as the upload provider (verify: upload a test image, confirm it's served from a `res.cloudinary.com` URL, not a local path) — verified via ticket 03's migration; the API key initially lacked read/upload permissions (Cloudinary's scoped-key feature), fixed on the account side
 - [x] All secrets live in `apps/cms/.env`, which is gitignored
 - [x] `pnpm --filter cms develop` (or the workspace equivalent) starts Strapi's admin panel locally without errors
+
+**Amendment (during ticket 04):** added a `slug` field (`uid` type, required) to `Listing`, not originally in this ticket's field list. Without it, the only available identifier for a Listing is Strapi's own `documentId` — a random string — which would have replaced Phase 1's readable `/properties/downtown-loft-apartment/` URLs with something like `/properties/wrmv8h94mr2l8fg87bv5z34b/`. The migration script (ticket 03) sets it to the original seed filename, so every migrated Listing keeps its Phase 1 URL exactly.

@@ -14,6 +14,11 @@ export default defineConfig({
   integrations: [react()],
 
   image: {
-    domains: ['images.unsplash.com', 'picsum.photos', 'fastly.picsum.photos']
+    // images.unsplash.com: hardcoded marketing photography (hero, About,
+    // CtaBand) — unrelated to Listing data, stays regardless of data source.
+    // res.cloudinary.com: Listing Gallery / Agent photos, now served from
+    // Strapi's Cloudinary upload provider (ADR 0004) instead of the deleted
+    // Content Collection's picsum.photos placeholders.
+    domains: ['images.unsplash.com', 'res.cloudinary.com']
   }
 });

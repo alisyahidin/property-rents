@@ -11,6 +11,12 @@
 // original URL and re-uploaded to Strapi, which stores them via Cloudinary
 // (ADR 0004) — not left as external picsum.photos/Unsplash URLs.
 //
+// Each Listing's `slug` is its original seed filename (e.g.
+// `downtown-loft-apartment`), not Strapi's own `documentId` — a random id
+// would replace Phase 1's readable /properties/downtown-loft-apartment/
+// URLs with something like /properties/wrmv8h94mr2l8fg87bv5z34b/. Ticket 04
+// looks listings up by this slug.
+//
 // Usage:
 //   STRAPI_URL=http://localhost:1337 STRAPI_API_TOKEN=<full-access token> \
 //     node scripts/migrate-seed-listings.mjs
@@ -113,11 +119,13 @@ async function migrateListings(listings, agentIdsByEmail) {
       galleryIds.push(await uploadImageFromUrl(imageUrl));
     }
 
+    const slug = listing.file.replace(/\.json$/, '');
     const created = await strapiFetch('/api/listings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         data: {
+          slug,
           rent: listing.rent,
           propertyType: listing.propertyType,
           city: listing.city,
@@ -129,7 +137,9 @@ async function migrateListings(listings, agentIdsByEmail) {
         },
       }),
     });
-    console.log(`  -> created Listing #${created.data.id} (published: ${Boolean(created.data.publishedAt)})`);
+    console.log(
+      `  -> created Listing #${created.data.id}, slug="${created.data.slug}" (published: ${Boolean(created.data.publishedAt)})`,
+    );
   }
 }
 

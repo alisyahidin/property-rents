@@ -12,6 +12,10 @@
   },
   "pluginOptions": {},
   "attributes": {
+    "slug": {
+      "type": "uid",
+      "required": true
+    },
     "rent": {
       "type": "integer",
       "required": true,

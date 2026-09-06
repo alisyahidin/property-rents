@@ -1,13 +1,12 @@
 ---
 // About page, styled to the reference site's /about (hero → stats → story →
-// expertise → team → CTA). Content is grounded in what Phase 1 actually is:
-// stats are computed from the real Content Collection rather than invented
-// sales numbers, and "Meet the Agents" uses the real agents already on our
-// listings (deduped by email) instead of a fabricated team roster — this
-// site has no separate agents/team data model (CONTEXT.md: Agent is contact
-// info on a Listing, not its own entity), so this is the honest version of
-// that section for our domain.
-import { getCollection } from 'astro:content';
+// expertise → team → CTA). Content is grounded in what's actually true:
+// stats are computed from Strapi (ticket 04's data-source swap) rather than
+// invented sales numbers, and "Meet the Agents" uses the real agents
+// already on our listings (deduped by email) instead of a fabricated team
+// roster — this site has no separate agents/team data model (CONTEXT.md:
+// Agent is contact info on a Listing, not its own entity), so this is the
+// honest version of that section for our domain.
 import { Image } from 'astro:assets';
 import Layout from '../../layouts/Layout.astro';
 import Eyebrow from '../../components/Eyebrow';
@@ -15,9 +14,9 @@ import SectionIntro from '../../components/SectionIntro';
 import CtaBand from '../../components/CtaBand';
 import { Reveal, RevealGroup, RevealItem } from '../../components/motion/Reveal';
 import type { Listing } from '../../lib/filterListings';
+import { fetchListings } from '../../lib/strapi';
 
-const entries = await getCollection('listings');
-const listings: Listing[] = entries.map((entry) => ({ id: entry.id, ...entry.data }));
+const listings: Listing[] = await fetchListings();
 
 const cityCount = new Set(listings.map((listing) => listing.city)).size;
 const propertyTypeCount = new Set(listings.map((listing) => listing.propertyType)).size;
