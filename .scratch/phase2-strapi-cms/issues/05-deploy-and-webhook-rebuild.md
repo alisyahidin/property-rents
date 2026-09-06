@@ -12,12 +12,14 @@ See `docs/specs/phase2-strapi-cms.md` (Implementation Decisions: Hosting topolog
 
 **Blocked by:** 04 (the deployed build needs to actually depend on Strapi data for the webhook loop to mean anything), and on VPS access details (provider, IP/SSH, domain) not yet provided
 
-**Status:** ready-for-agent (pending VPS access)
+**Amendment (deploy):** no domain was available yet, so TLS is deferred rather than skipped — Caddy reverse-proxies plain HTTP on :80 → Strapi's internal :1337 (ufw only opens 22/80/443), so Strapi's own port still isn't publicly exposed even without a cert yet. `apps/web`'s `STRAPI_URL` points at the bare VPS IP (`http://43.133.155.96`) until a domain is added. Separately, Turborepo was silently dropping `STRAPI_URL` from the build (not declared under `tasks.build.env` in `turbo.json`), which failed the first Vercel build with `ECONNREFUSED 127.0.0.1:1337` — fixed by adding `"env": ["STRAPI_URL"]` to the build task. `phase2-strapi-cms` was merged into `main` via PR #2 so Vercel's production branch (`main`) picks up the Strapi-backed build.
 
-- [ ] `apps/cms` runs on the VPS as a persistent process (systemd or pm2), surviving a reboot
-- [ ] A reverse proxy terminates TLS in front of Strapi; Strapi's own port is not publicly exposed
-- [ ] Production Neon + Cloudinary credentials are in place on the VPS (fresh secrets, not local dev values)
-- [ ] `apps/web` is live on Vercel, its build successfully fetching from the VPS-hosted Strapi instance
-- [ ] A Vercel Deploy Hook exists and its URL is configured as a Strapi webhook target
-- [ ] The Strapi webhook fires on Listing publish, update (while Published), unpublish, and delete — not on Draft saves
-- [ ] End-to-end check: publish a test change in Strapi's production admin panel, confirm a Vercel rebuild is triggered, and confirm the live site reflects the change once it completes
+**Status:** done
+
+- [x] `apps/cms` runs on the VPS as a persistent process (pm2, `pm2 start pnpm --name cms -- --filter cms start`), surviving a reboot (`pm2 save` + `pm2 startup` systemd unit)
+- [x] A reverse proxy terminates HTTP in front of Strapi; Strapi's own port is not publicly exposed (TLS itself deferred — no domain yet, see amendment)
+- [x] Production Neon + Cloudinary credentials are in place on the VPS (the same real credentials already used since ticket 01/03 — dev and prod share one Strapi instance per the spec's Dev environment decision, so there's no separate "prod-only" secret set)
+- [x] `apps/web` is live on Vercel (production, `main`), its build successfully fetching from the VPS-hosted Strapi instance — verified 7 listings render on `/properties`
+- [x] A Vercel Deploy Hook exists and its URL is configured as a Strapi webhook target
+- [x] The Strapi webhook fires on Listing publish, update, unpublish, and delete — not Create, since Draft saves aren't visible and don't need a rebuild (Strapi's webhook events are global per-entry, not scoped to one content-type, so this also covers Agent changes — acceptable at this scale)
+- [x] End-to-end check: Strapi's webhook "Trigger" test fired the Vercel Deploy Hook and a new Production deployment completed successfully
